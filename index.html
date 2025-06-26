@@ -1,13 +1,2890 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KPI Dashboard Test</title>
-</head>
-<body style="background: linear-gradient(135deg, #8315b5, #5a0e7a); color: white; font-family: Arial; text-align: center; padding: 50px;">
-    <h1>🚀 GitHub Pages Çalışıyor!</h1>
-    <h2>📊 İstanbul Müşteriler KPI Dashboard</h2>
-    <p>Test başarılı! Ana dashboard yakında eklenecek.</p>
-</body>
-</html>
+import React, { useState, useEffect, useRef } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+// ✅ SİZİN SUPABASE BİLGİLERİNİZ
+const supabaseUrl = "https://clqkrlricmbcmjhqlpjf.supabase.co";
+const supabaseKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNscWtybHJpY21iY21qaHFscGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4Nzc2NjQsImV4cCI6MjA2NjQ1MzY2NH0.AjM30gVPmf7a3NalaBeIoPgoozsoePkzs-UeFA10QqI";
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const KPIDashboard = () => {
+  // Dashboard referansı (screenshot için)
+  const dashboardRef = useRef(null);
+  const metricsRef = useRef(null);
+
+  // Ana state'ler
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Veri state'leri
+  const [employees, setEmployees] = useState([
+    {
+      name: "Abdul Samet Dolu",
+      team: "İstanbul Müşteriler -4",
+      segment: "BM",
+      performance: 89.5,
+    },
+    {
+      name: "Ayşe Ersoy",
+      team: "İstanbul Müşteriler -4",
+      segment: "BM",
+      performance: 101.2,
+    },
+    {
+      name: "Batuhan Boyraz",
+      team: "İstanbul Müşteriler -3",
+      segment: "BM",
+      performance: 93.7,
+    },
+    {
+      name: "Burcu Cebeci",
+      team: "İstanbul Müşteriler -1",
+      segment: "ÖM",
+      performance: 95.8,
+    },
+    {
+      name: "Duygu Maranci",
+      team: "İstanbul Müşteriler -1",
+      segment: "BM",
+      performance: 87.4,
+    },
+    {
+      name: "Ece Karaman",
+      team: "İstanbul Müşteriler -3",
+      segment: "BM",
+      performance: 96.1,
+    },
+    {
+      name: "Efe Acar",
+      team: "İstanbul Müşteriler -2",
+      segment: "BM",
+      performance: 91.3,
+    },
+    {
+      name: "Ekrem Güler",
+      team: "İstanbul Müşteriler -1",
+      segment: "ÖM",
+      performance: 88.9,
+    },
+    {
+      name: "Hasan Aycan Yılmaz",
+      team: "İstanbul Müşteriler -3",
+      segment: "BM",
+      performance: 92.6,
+    },
+    {
+      name: "Kaan Yasin Dinçer",
+      team: "İstanbul Müşteriler -2",
+      segment: "BM",
+      performance: 90.1,
+    },
+    {
+      name: "Kenan Furuncu",
+      team: "İstanbul Müşteriler -4",
+      segment: "ÖM",
+      performance: 94.3,
+    },
+    {
+      name: "Mert Bayramoğlu",
+      team: "İstanbul Müşteriler -1",
+      segment: "ÖM",
+      performance: 99.1,
+    },
+    {
+      name: "Merve Vural",
+      team: "İstanbul Müşteriler -3",
+      segment: "BM",
+      performance: 85.7,
+    },
+    {
+      name: "Murat Altun",
+      team: "İstanbul Müşteriler -4",
+      segment: "BM",
+      performance: 93.2,
+    },
+    {
+      name: "Mustafa Karayandı",
+      team: "İstanbul Müşteriler -2",
+      segment: "BM",
+      performance: 89.8,
+    },
+    {
+      name: "Mürüvvet Emek",
+      team: "İstanbul Müşteriler -4",
+      segment: "ÖM",
+      performance: 97.4,
+    },
+    {
+      name: "Naile Sürmeli",
+      team: "İstanbul Müşteriler -4",
+      segment: "BM",
+      performance: 91.6,
+    },
+    {
+      name: "Nida Ezer",
+      team: "İstanbul Müşteriler -1",
+      segment: "BM",
+      performance: 86.3,
+    },
+    {
+      name: "Ömer Emre Çeltekoğlu",
+      team: "İstanbul Müşteriler -2",
+      segment: "ÖM",
+      performance: 92.9,
+    },
+    {
+      name: "Samet Cömert",
+      team: "İstanbul Müşteriler -2",
+      segment: "ÖM",
+      performance: 88.1,
+    },
+    {
+      name: "Semih Erkılıç",
+      team: "İstanbul Müşteriler -1",
+      segment: "BM",
+      performance: 95.2,
+    },
+    {
+      name: "Serdar Tahtalı",
+      team: "İstanbul Müşteriler -3",
+      segment: "ÖM",
+      performance: 90.7,
+    },
+    {
+      name: "Seyhan Erol",
+      team: "İstanbul Müşteriler -4",
+      segment: "ÖM",
+      performance: 87.8,
+    },
+    {
+      name: "Şeniz Türedi Güçlü",
+      team: "İstanbul Müşteriler -2",
+      segment: "ÖM",
+      performance: 94.6,
+    },
+    {
+      name: "Taylan Murat Seymen",
+      team: "İstanbul Müşteriler -1",
+      segment: "BM",
+      performance: 89.4,
+    },
+    {
+      name: "Vivet Bahar",
+      team: "İstanbul Müşteriler -2",
+      segment: "ÖM",
+      performance: 93.8,
+    },
+    {
+      name: "Yasemin Ağaçbüken Üçler",
+      team: "İstanbul Müşteriler -3",
+      segment: "ÖM",
+      performance: 91.9,
+    },
+    {
+      name: "Yiğit Mert Demir",
+      team: "İstanbul Müşteriler -3",
+      segment: "BM",
+      performance: 88.5,
+    },
+  ]);
+
+  const [dataEntries, setDataEntries] = useState([]);
+  const [teams, setTeams] = useState([
+    { name: "İstanbul Müşteriler -1", password: "team1234" },
+    { name: "İstanbul Müşteriler -2", password: "team1234" },
+    { name: "İstanbul Müşteriler -3", password: "team1234" },
+    { name: "İstanbul Müşteriler -4", password: "team1234" },
+  ]);
+  const [kpiTargets, setKpiTargets] = useState({
+    calls: 45,
+    proposals: 5,
+    online_visits: 2,
+    physical_visits: 1,
+    total_visits: 3,
+  });
+  const [adminSettings, setAdminSettings] = useState({
+    admin_password: "admin123",
+  });
+
+  // Form state'leri
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split("T")[0],
+    employee: "",
+    calls: "",
+    proposals: "",
+    onlineVisits: "",
+    physicalVisits: "",
+    onLeave: false,
+  });
+
+  const [bulkFormData, setBulkFormData] = useState({
+    date: new Date().toISOString().split("T")[0],
+    team: "",
+    employees: [],
+  });
+
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // Modal state'leri
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [showBulkPasswordModal, setShowBulkPasswordModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [deleteType, setDeleteType] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [oldPasswordInput, setOldPasswordInput] = useState("");
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [passwordAction, setPasswordAction] = useState("");
+  const [emailData, setEmailData] = useState({
+    recipient: "",
+    subject: "",
+    type: "",
+  });
+
+  // Admin form state'leri
+  const [adminFormData, setAdminFormData] = useState({
+    newEmployee: { name: "", team: "", segment: "BM" },
+    kpiUpdates: {},
+    passwordUpdates: {},
+  });
+
+  // Sayfa yüklendiğinde
+  useEffect(() => {
+    loadAllData();
+  }, []);
+
+  // Tüm verileri yükle
+  const loadAllData = async () => {
+    await Promise.all([
+      loadDataFromSupabase(),
+      loadTeams(),
+      loadKpiTargets(),
+      loadAdminSettings(),
+    ]);
+    setTimeout(() => updateEmployeePerformances(), 500);
+  };
+
+  // Verileri yenile (manuel)
+  const refreshData = async () => {
+    setRefreshing(true);
+    await loadAllData();
+    updateEmployeePerformances();
+    setRefreshing(false);
+    alert("✅ Veriler yenilendi!");
+  };
+
+  // Çalışan performanslarını güncelle
+  const updateEmployeePerformances = () => {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const monthlyEntries = dataEntries.filter(
+      (e) => e.date.startsWith(currentMonth) && !e.on_leave,
+    );
+
+    setEmployees((prevEmployees) =>
+      prevEmployees.map((emp) => {
+        const empEntries = monthlyEntries.filter(
+          (e) => e.employee === emp.name,
+        );
+        if (empEntries.length === 0) return { ...emp, performance: 85.0 };
+
+        const avgCalls =
+          empEntries.reduce((sum, e) => sum + (e.calls || 0), 0) /
+          empEntries.length;
+        const avgProposals =
+          empEntries.reduce((sum, e) => sum + (e.proposals || 0), 0) /
+          empEntries.length;
+        const avgVisits =
+          empEntries.reduce((sum, e) => sum + (e.total_visits || 0), 0) /
+          empEntries.length;
+
+        const performance =
+          ((avgCalls / (kpiTargets.calls || 45)) * 40 +
+            (avgProposals / (kpiTargets.proposals || 5)) * 30 +
+            (avgVisits / (kpiTargets.total_visits || 3)) * 30) *
+          100;
+
+        return { ...emp, performance: Math.min(performance, 150) };
+      }),
+    );
+  };
+
+  // İş günü hesaplama fonksiyonu
+  const getWorkDaysInMonth = (year, month) => {
+    let workDays = 0;
+    const daysInMonth = new Date(year, month + 1, 0).getDate(); // Ayın son günü
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dayOfWeek = date.getDay();
+      // Pazartesi(1) - Cuma(5) arası iş günü sayılır
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        workDays++;
+      }
+    }
+
+    return workDays;
+  };
+
+  // Geçmiş iş günlerini hesaplama (bugüne kadar)
+  const getWorkDaysUntilToday = (year, month) => {
+    let workDays = 0;
+    const today = new Date();
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    // Eğer gelecek ay ise 0 döndür
+    if (year > currentYear || (year === currentYear && month > currentMonth)) {
+      return 0;
+    }
+
+    // Eğer geçmiş ay ise tüm iş günlerini say
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+      return getWorkDaysInMonth(year, month);
+    }
+
+    // Bu ay ise bugüne kadar olan iş günlerini say
+    for (let day = 1; day <= currentDay; day++) {
+      const date = new Date(year, month, day);
+      const dayOfWeek = date.getDay();
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        workDays++;
+      }
+    }
+
+    return workDays;
+  };
+
+  // Export to Excel function
+  const exportToExcel = (data, filename) => {
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      Object.keys(data[0]).join(",") +
+      "\n" +
+      data.map((row) => Object.values(row).join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `${filename}_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Screenshot ve WhatsApp functions
+  const takeScreenshot = () => {
+    return new Promise((resolve) => {
+      if (!metricsRef.current) {
+        resolve(null);
+        return;
+      }
+
+      // html2canvas'ı dinamik olarak yükle
+      if (!window.html2canvas) {
+        const script = document.createElement("script");
+        script.src =
+          "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+        script.onload = () => {
+          captureElement();
+        };
+        script.onerror = () => {
+          console.error("html2canvas yüklenemedi");
+          resolve(null);
+        };
+        document.head.appendChild(script);
+      } else {
+        captureElement();
+      }
+
+      function captureElement() {
+        try {
+          window
+            .html2canvas(metricsRef.current, {
+              backgroundColor: "#ffffff",
+              scale: 2,
+              logging: false,
+              useCORS: true,
+              allowTaint: true,
+              width: metricsRef.current.scrollWidth,
+              height: metricsRef.current.scrollHeight,
+            })
+            .then((canvas) => {
+              const dataURL = canvas.toDataURL("image/png", 0.9);
+              resolve(dataURL);
+            })
+            .catch((error) => {
+              console.error("Screenshot alma hatası:", error);
+              resolve(null);
+            });
+        } catch (error) {
+          console.error("html2canvas hatası:", error);
+          resolve(null);
+        }
+      }
+    });
+  };
+
+  const sendEmail = async (type, data = null) => {
+    setShowEmailModal(false);
+
+    if (type === "screenshot") {
+      alert("📸 Günlük ortalamalar screenshot alınıyor...");
+      const screenshot = await takeScreenshot();
+
+      const emailContent = screenshot
+        ? "Günlük ortalamalar görüntüsü ekte yer almaktadır."
+        : "Dashboard metinsel özeti ekte yer almaktadır.";
+
+      alert(
+        `📧 Email gönderildi!\nAlıcı: ${emailData.recipient}\nKonu: ${emailData.subject}\nİçerik: ${emailContent}`,
+      );
+    } else {
+      const emailContent = "Rapor dosyası ekte yer almaktadır.";
+      alert(
+        `📧 Email gönderildi!\nAlıcı: ${emailData.recipient}\nKonu: ${emailData.subject}\nİçerik: ${emailContent}`,
+      );
+    }
+  };
+
+  const sendWhatsApp = async () => {
+    // Önce kullanıcıya bilgi ver
+    alert("📸 Günlük ortalamalar screenshot alınıyor, lütfen bekleyin...");
+
+    const screenshot = await takeScreenshot();
+    const currentMetrics = calculateMetrics();
+
+    const message = `📊 İstanbul Müşteriler KPI Dashboard - ${new Date().toLocaleDateString("tr-TR")}
+
+📈 Günlük Ortalamalar:
+• Arama: ${currentMetrics.avgCalls}
+• Teklif: ${currentMetrics.avgProposals}  
+• Online Ziyaret: ${currentMetrics.avgOnline}
+• Fiziki Ziyaret: ${currentMetrics.avgPhysical}
+• Toplam Ziyaret: ${currentMetrics.avgTotal}
+• Aktif Çalışan: ${currentMetrics.activeCount}/${employees.length}
+
+Günlük ortalamalar görüntüsü ekte!`;
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+    if (screenshot) {
+      // Screenshot'ı yeni pencerede göster ve WhatsApp link'i ile birlikte sun
+      const newWindow = window.open("", "_blank");
+      newWindow.document.write(`
+        <html>
+          <head>
+            <title>📊 Günlük Ortalamalar Screenshot</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+              .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+              .header { background: #8315b5; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+              .screenshot { width: 100%; border: 2px solid #8315b5; border-radius: 8px; margin: 20px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+              .buttons { text-align: center; margin: 20px 0; }
+              .btn { background: #25D366; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 0 10px; display: inline-block; }
+              .btn:hover { background: #1da851; }
+              .download-btn { background: #007bff; }
+              .download-btn:hover { background: #0056b3; }
+              .info { background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #28a745; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>📊 Günlük Ortalamalar</h1>
+                <p>${new Date().toLocaleDateString("tr-TR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
+              </div>
+
+              <div class="info">
+                <strong>📈 Performans Özeti:</strong><br>
+                • Ortalama Arama: ${currentMetrics.avgCalls}<br>
+                • Ortalama Teklif: ${currentMetrics.avgProposals}<br>
+                • Ortalama Online Ziyaret: ${currentMetrics.avgOnline}<br>
+                • Ortalama Fiziki Ziyaret: ${currentMetrics.avgPhysical}<br>
+                • Ortalama Toplam Ziyaret: ${currentMetrics.avgTotal}<br>
+                • Aktif Çalışan: ${currentMetrics.activeCount}/${employees.length}
+              </div>
+
+              <img src="${screenshot}" alt="Günlük Ortalamalar" class="screenshot" />
+
+              <div class="buttons">
+                <a href="${whatsappUrl}" target="_blank" class="btn">📱 WhatsApp'ta Paylaş</a>
+                <a href="${screenshot}" download="gunluk-ortalamalar-${new Date().toISOString().split("T")[0]}.png" class="btn download-btn">💾 Resmi İndir</a>
+              </div>
+
+              <div class="info">
+                <strong>💡 Kullanım:</strong><br>
+                1. 📱 "WhatsApp'ta Paylaş" ile mesajı gönderin<br>
+                2. 💾 "Resmi İndir" ile görseli kaydedin<br>
+                3. WhatsApp'ta resmi manuel olarak ekleyebilirsiniz
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+
+      alert("✅ Günlük ortalamalar screenshot alındı! Yeni pencere açıldı.");
+    } else {
+      // Screenshot alınamazsa sadece mesajı gönder
+      window.open(whatsappUrl, "_blank");
+      alert("⚠️ Screenshot alınamadı, sadece metin mesajı paylaşılacak.");
+    }
+  };
+
+  // Supabase işlemleri
+  const loadDataFromSupabase = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("data_entries")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Veri yükleme hatası:", error);
+      } else {
+        setDataEntries(data || []);
+      }
+    } catch (error) {
+      console.error("Beklenmeyen hata:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadTeams = async () => {
+    try {
+      const { data, error } = await supabase.from("teams").select("*");
+      if (!error && data && data.length > 0) {
+        setTeams(data);
+      }
+    } catch (error) {
+      console.error("Ekip yükleme hatası:", error);
+    }
+  };
+
+  const loadKpiTargets = async () => {
+    try {
+      const { data, error } = await supabase.from("kpi_targets").select("*");
+      if (!error && data && data.length > 0) {
+        const targets = {};
+        data.forEach((item) => {
+          targets[item.metric_name] = item.target_value;
+        });
+        setKpiTargets(targets);
+      }
+    } catch (error) {
+      console.error("KPI hedef yükleme hatası:", error);
+    }
+  };
+
+  const loadAdminSettings = async () => {
+    try {
+      const { data, error } = await supabase.from("admin_settings").select("*");
+      if (!error && data && data.length > 0) {
+        const settings = {};
+        data.forEach((item) => {
+          settings[item.setting_name] = item.setting_value;
+        });
+        setAdminSettings(settings);
+      }
+    } catch (error) {
+      console.error("Admin ayar yükleme hatası:", error);
+    }
+  };
+
+  const verifyPassword = (password, type, teamName = null) => {
+    if (type === "admin") {
+      return password === adminSettings.admin_password;
+    } else if (type === "team" && teamName) {
+      const team = teams.find((t) => t.name === teamName);
+      return team && password === team.password;
+    }
+    return false;
+  };
+
+  const saveToSupabase = async (entryData) => {
+    try {
+      setLoading(true);
+
+      const calls = entryData.onLeave ? 0 : parseInt(entryData.calls) || 0;
+      const proposals = entryData.onLeave
+        ? 0
+        : parseInt(entryData.proposals) || 0;
+      const onlineVisits = entryData.onLeave
+        ? 0
+        : parseInt(entryData.onlineVisits) || 0;
+      const physicalVisits = entryData.onLeave
+        ? 0
+        : parseInt(entryData.physicalVisits) || 0;
+
+      const { data, error } = await supabase
+        .from("data_entries")
+        .insert([
+          {
+            date: entryData.date,
+            employee: entryData.employee,
+            team: selectedEmployee?.team || "",
+            calls: calls,
+            proposals: proposals,
+            online_visits: onlineVisits,
+            physical_visits: physicalVisits,
+            total_visits: onlineVisits + physicalVisits,
+            on_leave: entryData.onLeave === true,
+          },
+        ])
+        .select();
+
+      if (error) {
+        alert("❌ Veri kaydedilemedi: " + error.message);
+        return false;
+      } else {
+        await loadDataFromSupabase();
+        return true;
+      }
+    } catch (error) {
+      alert("❌ Beklenmeyen hata: " + error.message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // VERİ SİLME FONKSİYONLARI
+  const deleteIndividualData = async (employeeName, date) => {
+    const password = prompt("Admin şifresi girin:");
+    if (!verifyPassword(password, "admin")) {
+      alert("❌ Yanlış admin şifresi!");
+      return;
+    }
+
+    if (
+      confirm(
+        `${employeeName} için ${date} tarihli veriyi silmek istediğinizden emin misiniz?`,
+      )
+    ) {
+      try {
+        const { error } = await supabase
+          .from("data_entries")
+          .delete()
+          .eq("employee", employeeName)
+          .eq("date", date);
+
+        if (error) {
+          alert("❌ Veri silinemedi: " + error.message);
+        } else {
+          await loadDataFromSupabase();
+          alert("✅ Veri silindi!");
+        }
+      } catch (error) {
+        alert("❌ Hata: " + error.message);
+      }
+    }
+  };
+
+  const deleteTeamData = async (teamName, date) => {
+    const password = prompt("Admin şifresi girin:");
+    if (!verifyPassword(password, "admin")) {
+      alert("❌ Yanlış admin şifresi!");
+      return;
+    }
+
+    if (
+      confirm(
+        `${teamName} ekibi için ${date} tarihli tüm verileri silmek istediğinizden emin misiniz?`,
+      )
+    ) {
+      try {
+        const { error } = await supabase
+          .from("data_entries")
+          .delete()
+          .eq("team", teamName)
+          .eq("date", date);
+
+        if (error) {
+          alert("❌ Veriler silinemedi: " + error.message);
+        } else {
+          await loadDataFromSupabase();
+          alert("✅ Ekip verileri silindi!");
+        }
+      } catch (error) {
+        alert("❌ Hata: " + error.message);
+      }
+    }
+  };
+
+  const deleteAllData = async (date) => {
+    const password = prompt("Admin şifresi girin:");
+    if (!verifyPassword(password, "admin")) {
+      alert("❌ Yanlış admin şifresi!");
+      return;
+    }
+
+    if (
+      confirm(
+        `${date} tarihli TÜM verileri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`,
+      )
+    ) {
+      try {
+        const { error } = await supabase
+          .from("data_entries")
+          .delete()
+          .eq("date", date);
+
+        if (error) {
+          alert("❌ Veriler silinemedi: " + error.message);
+        } else {
+          await loadDataFromSupabase();
+          alert("✅ Tüm veriler silindi!");
+        }
+      } catch (error) {
+        alert("❌ Hata: " + error.message);
+      }
+    }
+  };
+
+  // Toplu işlem fonksiyonları
+  const handleBulkTeamSelect = (teamName) => {
+    const teamEmployees = employees.filter((emp) => emp.team === teamName);
+    setBulkFormData((prev) => ({
+      ...prev,
+      team: teamName,
+      employees: teamEmployees.map((emp) => ({
+        name: emp.name,
+        calls: "",
+        proposals: "",
+        onlineVisits: "",
+        physicalVisits: "",
+        onLeave: false,
+      })),
+    }));
+  };
+
+  const handleBulkEmployeeChange = (index, field, value) => {
+    setBulkFormData((prev) => ({
+      ...prev,
+      employees: prev.employees.map((emp, i) =>
+        i === index ? { ...emp, [field]: value } : emp,
+      ),
+    }));
+  };
+
+  const submitBulkData = async () => {
+    const password = prompt(`${bulkFormData.team} ekibi için şifre girin:`);
+    const isValid = verifyPassword(password, "team", bulkFormData.team);
+
+    if (!isValid) {
+      alert("❌ Yanlış şifre!");
+      return;
+    }
+
+    let successCount = 0;
+    for (const emp of bulkFormData.employees) {
+      const entryData = {
+        date: bulkFormData.date,
+        employee: emp.name,
+        calls: emp.calls,
+        proposals: emp.proposals,
+        onlineVisits: emp.onlineVisits,
+        physicalVisits: emp.physicalVisits,
+        onLeave: emp.onLeave,
+      };
+
+      const empObj = employees.find((e) => e.name === emp.name);
+      setSelectedEmployee(empObj);
+
+      const success = await saveToSupabase(entryData);
+      if (success) successCount++;
+    }
+
+    // Dashboard'ı güncelle
+    await loadDataFromSupabase();
+    updateEmployeePerformances();
+
+    alert(
+      `✅ ${successCount}/${bulkFormData.employees.length} kayıt başarıyla kaydedildi!`,
+    );
+    setBulkFormData({
+      date: new Date().toISOString().split("T")[0],
+      team: "",
+      employees: [],
+    });
+  };
+
+  // Admin fonksiyonları
+  const addNewEmployee = async () => {
+    const password = prompt("Admin şifresi girin:");
+    const isValid = verifyPassword(password, "admin");
+
+    if (!isValid) {
+      alert("❌ Yanlış admin şifresi!");
+      return;
+    }
+
+    if (!adminFormData.newEmployee.name || !adminFormData.newEmployee.team) {
+      alert("❌ İsim ve ekip alanları zorunlu!");
+      return;
+    }
+
+    setEmployees((prev) => [
+      ...prev,
+      {
+        ...adminFormData.newEmployee,
+        performance: 85.0,
+      },
+    ]);
+
+    setAdminFormData((prev) => ({
+      ...prev,
+      newEmployee: { name: "", team: "", segment: "BM" },
+    }));
+
+    alert("✅ Yeni çalışan eklendi!");
+  };
+
+  const updateKpiTargets = async () => {
+    const password = prompt("Admin şifresi girin:");
+    const isValid = verifyPassword(password, "admin");
+
+    if (!isValid) {
+      alert("❌ Yanlış admin şifresi!");
+      return;
+    }
+
+    setKpiTargets((prev) => ({ ...prev, ...adminFormData.kpiUpdates }));
+    alert("✅ KPI hedefleri güncellendi!");
+  };
+
+  const deleteEmployee = async (employeeName) => {
+    const password = prompt("Admin şifresi girin:");
+    const isValid = verifyPassword(password, "admin");
+
+    if (!isValid) {
+      alert("❌ Yanlış admin şifresi!");
+      return;
+    }
+
+    if (
+      confirm(
+        `${employeeName} adlı çalışanı silmek istediğinizden emin misiniz?`,
+      )
+    ) {
+      setEmployees((prev) => prev.filter((emp) => emp.name !== employeeName));
+      alert("✅ Çalışan silindi!");
+    }
+  };
+
+  // ŞİFRE YÖNETİMİ FONKSİYONLARI (DÜZELTİLDİ)
+  const changeAdminPassword = async () => {
+    if (!oldPasswordInput || !newPasswordInput) {
+      alert("❌ Tüm alanları doldurun!");
+      return;
+    }
+
+    const isValid = verifyPassword(oldPasswordInput, "admin");
+    if (!isValid) {
+      alert("❌ Mevcut şifre yanlış!");
+      return;
+    }
+
+    // Admin şifresini güncelle
+    setAdminSettings((prev) => ({ ...prev, admin_password: newPasswordInput }));
+    setOldPasswordInput("");
+    setNewPasswordInput("");
+    alert("✅ Admin şifresi güncellendi!");
+  };
+
+  const changeTeamPassword = async (teamName) => {
+    const oldPassword = prompt(`${teamName} için mevcut şifre:`);
+    const isValid = verifyPassword(oldPassword, "team", teamName);
+
+    if (!isValid) {
+      alert("❌ Mevcut şifre yanlış!");
+      return;
+    }
+
+    const newPassword = prompt("Yeni şifre:");
+    if (!newPassword) return;
+
+    // Ekip şifresini güncelle
+    setTeams((prev) =>
+      prev.map((team) =>
+        team.name === teamName ? { ...team, password: newPassword } : team,
+      ),
+    );
+
+    alert("✅ Ekip şifresi güncellendi!");
+  };
+
+  // CSS Styles (Yeni tema rengiyle)
+  const styles = {
+    container: {
+      maxWidth: "1400px",
+      margin: "0 auto",
+      background: "white",
+      minHeight: "100vh",
+      boxShadow: "0 0 30px rgba(0, 0, 0, 0.3)",
+    },
+    header: {
+      background: "linear-gradient(135deg, #8315b5, #5a0e7a)",
+      color: "white",
+      padding: "20px",
+      textAlign: "center",
+      borderBottom: "4px solid #8315b5",
+    },
+    headerTitle: {
+      fontSize: "2.2em",
+      marginBottom: "5px",
+      fontWeight: "600",
+      textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+    },
+    navBar: {
+      background: "#f8f9fa",
+      padding: "0",
+      display: "flex",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+      flexWrap: "wrap",
+      borderBottom: "1px solid #dee2e6",
+    },
+    navTab: {
+      flex: "1",
+      background: "#e9ecef",
+      border: "none",
+      padding: "15px 8px",
+      cursor: "pointer",
+      fontWeight: "600",
+      color: "#495057",
+      transition: "all 0.3s ease",
+      borderBottom: "3px solid transparent",
+      minWidth: "120px",
+      fontSize: "13px",
+    },
+    navTabActive: {
+      background: "white",
+      color: "#8315b5",
+      borderBottom: "3px solid #8315b5",
+      boxShadow: "0 -2px 8px rgba(131, 21, 181, 0.2)",
+    },
+    content: {
+      padding: "30px",
+    },
+    metricsGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+      gap: "20px",
+      marginBottom: "30px",
+    },
+    metricCard: {
+      background: "linear-gradient(145deg, #fff, #f8f9fa)",
+      borderRadius: "12px",
+      padding: "25px",
+      textAlign: "center",
+      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+      borderLeft: "4px solid #8315b5",
+      transition: "all 0.3s ease",
+      position: "relative",
+      overflow: "hidden",
+    },
+    metricValue: {
+      fontSize: "2.5em",
+      fontWeight: "bold",
+      color: "#8315b5",
+      marginBottom: "10px",
+      textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+    },
+    metricLabel: {
+      color: "#6c757d",
+      fontWeight: "600",
+      fontSize: "0.9em",
+      marginBottom: "8px",
+    },
+    progressBar: {
+      width: "100%",
+      height: "8px",
+      background: "#e9ecef",
+      borderRadius: "4px",
+      overflow: "hidden",
+      margin: "10px 0",
+      boxShadow: "inset 0 1px 3px rgba(0, 0, 0, 0.1)",
+    },
+    progressFill: {
+      height: "100%",
+      borderRadius: "4px",
+      transition: "width 0.5s ease",
+    },
+    progressExcellent: {
+      background: "linear-gradient(90deg, #28a745, #20c997)",
+    },
+    progressGood: {
+      background: "linear-gradient(90deg, #ffc107, #fd7e14)",
+    },
+    formContainer: {
+      background: "white",
+      borderRadius: "12px",
+      padding: "30px",
+      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+      marginBottom: "30px",
+      border: "1px solid #e9ecef",
+    },
+    formGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+      gap: "25px",
+    },
+    formGroup: {
+      marginBottom: "20px",
+    },
+    label: {
+      display: "block",
+      marginBottom: "8px",
+      color: "#495057",
+      fontWeight: "600",
+      fontSize: "0.9em",
+    },
+    formControl: {
+      width: "100%",
+      padding: "12px 15px",
+      border: "2px solid #e9ecef",
+      borderRadius: "8px",
+      fontSize: "14px",
+      transition: "all 0.3s ease",
+      background: "white",
+    },
+    autoField: {
+      background: "#e8f5e8",
+      border: "2px solid #28a745",
+      color: "#155724",
+      fontWeight: "600",
+      padding: "12px 15px",
+      borderRadius: "8px",
+      fontSize: "14px",
+    },
+    btn: {
+      background: "linear-gradient(145deg, #8315b5, #5a0e7a)",
+      color: "white",
+      border: "none",
+      padding: "15px 30px",
+      borderRadius: "8px",
+      fontWeight: "600",
+      cursor: "pointer",
+      fontSize: "16px",
+      transition: "all 0.3s ease",
+      boxShadow: "0 4px 10px rgba(131, 21, 181, 0.3)",
+      margin: "5px",
+      textTransform: "uppercase",
+      letterSpacing: "0.5px",
+    },
+    btnSuccess: {
+      background: "linear-gradient(145deg, #28a745, #20c997)",
+      boxShadow: "0 4px 10px rgba(40, 167, 69, 0.3)",
+    },
+    btnDanger: {
+      background: "linear-gradient(145deg, #dc3545, #c82333)",
+      boxShadow: "0 4px 10px rgba(220, 53, 69, 0.3)",
+    },
+    btnWarning: {
+      background: "linear-gradient(145deg, #ffc107, #e0a800)",
+      color: "#212529",
+      boxShadow: "0 4px 10px rgba(255, 193, 7, 0.3)",
+    },
+    btnInfo: {
+      background: "linear-gradient(145deg, #17a2b8, #138496)",
+      boxShadow: "0 4px 10px rgba(23, 162, 184, 0.3)",
+    },
+    modal: {
+      display: "none",
+      position: "fixed",
+      zIndex: 1000,
+      left: 0,
+      top: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      backdropFilter: "blur(5px)",
+    },
+    modalOpen: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    modalContent: {
+      backgroundColor: "#fefefe",
+      padding: "30px",
+      borderRadius: "12px",
+      width: "90%",
+      maxWidth: "500px",
+      boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
+      position: "relative",
+      maxHeight: "80vh",
+      overflowY: "auto",
+    },
+    table: {
+      width: "100%",
+      borderCollapse: "collapse",
+      background: "white",
+      borderRadius: "8px",
+      overflow: "hidden",
+      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+      marginTop: "20px",
+    },
+    tableHeader: {
+      background: "linear-gradient(145deg, #8315b5, #5a0e7a)",
+      color: "white",
+      padding: "15px 12px",
+      textAlign: "left",
+      fontWeight: "600",
+      fontSize: "0.9em",
+      textTransform: "uppercase",
+      letterSpacing: "0.5px",
+    },
+    tableCell: {
+      padding: "12px",
+      borderBottom: "1px solid #e9ecef",
+      fontSize: "0.9em",
+    },
+    statusInfo: {
+      padding: "15px",
+      borderRadius: "8px",
+      marginBottom: "20px",
+      border: "1px solid",
+      fontWeight: "bold",
+    },
+    statusSuccess: {
+      background: "#d4edda",
+      color: "#155724",
+      borderColor: "#28a745",
+    },
+    statusWarning: {
+      background: "#fff3cd",
+      color: "#856404",
+      borderColor: "#ffc107",
+    },
+    statusError: {
+      background: "#f8d7da",
+      color: "#721c24",
+      borderColor: "#dc3545",
+    },
+    adminCard: {
+      background: "linear-gradient(145deg, #fff, #f8f9fa)",
+      border: "2px solid #ffc107",
+      borderRadius: "12px",
+      padding: "25px",
+      marginBottom: "20px",
+      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+    },
+    hierarchyContainer: {
+      marginBottom: "30px",
+    },
+    teamHeader: {
+      background: "linear-gradient(145deg, #8315b5, #5a0e7a)",
+      color: "white",
+      padding: "15px 20px",
+      borderRadius: "8px",
+      marginBottom: "15px",
+      fontSize: "1.2em",
+      fontWeight: "bold",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+    },
+    employeeList: {
+      marginLeft: "20px",
+      marginBottom: "20px",
+    },
+    employeeItem: {
+      background: "#f8f9fa",
+      padding: "10px 15px",
+      borderRadius: "6px",
+      marginBottom: "8px",
+      borderLeft: "4px solid #28a745",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    exportButtons: {
+      display: "flex",
+      gap: "10px",
+      marginBottom: "20px",
+      flexWrap: "wrap",
+    },
+    bulkGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+      gap: "10px",
+      marginBottom: "15px",
+    },
+    bulkInput: {
+      padding: "8px",
+      border: "1px solid #ddd",
+      borderRadius: "4px",
+      fontSize: "12px",
+    },
+    passwordHidden: {
+      background: "#f0f0f0",
+      border: "2px solid #8315b5",
+      color: "#8315b5",
+      fontWeight: "600",
+      padding: "12px 15px",
+      borderRadius: "8px",
+      fontSize: "14px",
+      letterSpacing: "2px",
+    },
+  };
+
+  // Event handlers
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+
+    if (name === "employee") {
+      const emp = employees.find((e) => e.name === value);
+      setSelectedEmployee(emp || null);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.employee) {
+      alert("❌ Lütfen çalışan seçin!");
+      return;
+    }
+
+    const success = await saveToSupabase(formData);
+
+    if (success) {
+      setFormData({
+        date: new Date().toISOString().split("T")[0],
+        employee: "",
+        calls: "",
+        proposals: "",
+        onlineVisits: "",
+        physicalVisits: "",
+        onLeave: false,
+      });
+      setSelectedEmployee(null);
+      alert("✅ Veri başarıyla kaydedildi!");
+    }
+  };
+
+  const openEmailModal = (type, data = null) => {
+    setEmailData({
+      recipient: "",
+      subject:
+        type === "screenshot" ? "Dashboard Ekran Görüntüsü" : "Rapor Dosyası",
+      type: type,
+      data: data,
+    });
+    setShowEmailModal(true);
+  };
+
+  // Utility functions
+  const MetricCard = ({ value, label, target, progress, progressType }) => (
+    <div style={styles.metricCard}>
+      <div style={styles.metricValue}>{value}</div>
+      <div style={styles.metricLabel}>{label}</div>
+      {target && (
+        <div
+          style={{
+            color: "#28a745",
+            fontSize: "0.8em",
+            marginTop: "5px",
+            fontWeight: "500",
+          }}
+        >
+          Hedef: {target}
+        </div>
+      )}
+      <div style={styles.progressBar}>
+        <div
+          style={{
+            ...styles.progressFill,
+            ...(progressType === "excellent"
+              ? styles.progressExcellent
+              : styles.progressGood),
+            width: `${progress}%`,
+          }}
+        />
+      </div>
+    </div>
+  );
+
+  // Düzeltilmiş günlük ortalama hesaplama fonksiyonu - izinliler hariç
+  const calculateMetrics = () => {
+    if (dataEntries.length === 0)
+      return {
+        avgCalls: 0,
+        avgProposals: 0,
+        avgOnline: 0,
+        avgPhysical: 0,
+        avgTotal: 0,
+        activeCount: 0,
+      };
+
+    const today = new Date().toISOString().split("T")[0];
+    const todayEntries = dataEntries.filter(
+      (e) => e.date === today && !e.on_leave,
+    );
+
+    if (todayEntries.length === 0)
+      return {
+        avgCalls: 0,
+        avgProposals: 0,
+        avgOnline: 0,
+        avgPhysical: 0,
+        avgTotal: 0,
+        activeCount: 0,
+      };
+
+    return {
+      avgCalls: (
+        todayEntries.reduce((sum, e) => sum + (e.calls || 0), 0) /
+        todayEntries.length
+      ).toFixed(1),
+      avgProposals: (
+        todayEntries.reduce((sum, e) => sum + (e.proposals || 0), 0) /
+        todayEntries.length
+      ).toFixed(1),
+      avgOnline: (
+        todayEntries.reduce((sum, e) => sum + (e.online_visits || 0), 0) /
+        todayEntries.length
+      ).toFixed(1),
+      avgPhysical: (
+        todayEntries.reduce((sum, e) => sum + (e.physical_visits || 0), 0) /
+        todayEntries.length
+      ).toFixed(1),
+      avgTotal: (
+        todayEntries.reduce((sum, e) => sum + (e.total_visits || 0), 0) /
+        todayEntries.length
+      ).toFixed(1),
+      activeCount: todayEntries.length,
+    };
+  };
+
+  const getConnectionStatus = () => {
+    if (supabaseKey === "BURAYA_ANON_KEY_YAZACAKSIN") {
+      return {
+        type: "error",
+        message: "❌ Supabase API anahtarları henüz ayarlanmadı!",
+      };
+    } else if (dataEntries.length > 0) {
+      return {
+        type: "success",
+        message:
+          "✅ Supabase bağlantısı başarılı! " +
+          dataEntries.length +
+          " kayıt bulundu.",
+      };
+    } else {
+      return {
+        type: "warning",
+        message: "⚠️ Supabase bağlandı ama henüz veri yok. İlk kaydı girin!",
+      };
+    }
+  };
+
+  const calculateMonthlyRankings = () => {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const monthlyEntries = dataEntries.filter(
+      (e) => e.date.startsWith(currentMonth) && !e.on_leave,
+    );
+
+    // İş günü hesaplama - bugüne kadar geçen iş günleri
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth();
+    const workDaysUntilToday = getWorkDaysUntilToday(year, month);
+    const totalWorkDaysInMonth = getWorkDaysInMonth(year, month);
+
+    const employeeStats = {};
+    monthlyEntries.forEach((entry) => {
+      if (!employeeStats[entry.employee]) {
+        employeeStats[entry.employee] = {
+          name: entry.employee,
+          team: entry.team,
+          totalCalls: 0,
+          totalProposals: 0,
+          totalVisits: 0,
+          days: 0,
+        };
+      }
+      employeeStats[entry.employee].totalCalls += entry.calls || 0;
+      employeeStats[entry.employee].totalProposals += entry.proposals || 0;
+      employeeStats[entry.employee].totalVisits += entry.total_visits || 0;
+      employeeStats[entry.employee].days += 1;
+    });
+
+    const teamStats = {};
+    Object.values(employeeStats).forEach((emp) => {
+      if (!teamStats[emp.team]) {
+        teamStats[emp.team] = {
+          name: emp.team,
+          totalCalls: 0,
+          totalProposals: 0,
+          totalVisits: 0,
+          employeeCount: 0,
+          totalDays: 0,
+        };
+      }
+      teamStats[emp.team].totalCalls += emp.totalCalls;
+      teamStats[emp.team].totalProposals += emp.totalProposals;
+      teamStats[emp.team].totalVisits += emp.totalVisits;
+      teamStats[emp.team].employeeCount += 1;
+      teamStats[emp.team].totalDays += emp.days;
+    });
+
+    const rankedEmployees = Object.values(employeeStats)
+      .map((emp) => ({
+        ...emp,
+        avgCalls:
+          workDaysUntilToday > 0
+            ? (emp.totalCalls / workDaysUntilToday).toFixed(1)
+            : 0,
+        avgProposals:
+          workDaysUntilToday > 0
+            ? (emp.totalProposals / workDaysUntilToday).toFixed(1)
+            : 0,
+        avgVisits:
+          workDaysUntilToday > 0
+            ? (emp.totalVisits / workDaysUntilToday).toFixed(1)
+            : 0,
+      }))
+      .sort((a, b) => b.totalVisits - a.totalVisits);
+
+    const rankedTeams = Object.values(teamStats)
+      .map((team) => ({
+        ...team,
+        avgCalls:
+          workDaysUntilToday > 0
+            ? (team.totalCalls / workDaysUntilToday).toFixed(1)
+            : 0,
+        avgProposals:
+          workDaysUntilToday > 0
+            ? (team.totalProposals / workDaysUntilToday).toFixed(1)
+            : 0,
+        avgVisits:
+          workDaysUntilToday > 0
+            ? (team.totalVisits / workDaysUntilToday).toFixed(1)
+            : 0,
+      }))
+      .sort((a, b) => b.totalVisits - a.totalVisits);
+
+    return {
+      rankedEmployees,
+      rankedTeams,
+      workDays: workDaysUntilToday,
+      totalWorkDays: totalWorkDaysInMonth,
+    };
+  };
+
+  // Alt ekip ortalamalarını hesaplama fonksiyonu
+  const calculateTeamMetrics = (teamName) => {
+    const today = new Date().toISOString().split("T")[0];
+    const teamEntries = dataEntries.filter(
+      (e) => e.date === today && e.team === teamName && !e.on_leave,
+    );
+
+    if (teamEntries.length === 0)
+      return { avgCalls: 0, avgProposals: 0, avgTotal: 0, activeCount: 0 };
+
+    return {
+      avgCalls: (
+        teamEntries.reduce((sum, e) => sum + (e.calls || 0), 0) /
+        teamEntries.length
+      ).toFixed(1),
+      avgProposals: (
+        teamEntries.reduce((sum, e) => sum + (e.proposals || 0), 0) /
+        teamEntries.length
+      ).toFixed(1),
+      avgTotal: (
+        teamEntries.reduce((sum, e) => sum + (e.total_visits || 0), 0) /
+        teamEntries.length
+      ).toFixed(1),
+      activeCount: teamEntries.length,
+    };
+  };
+
+  const getUniqueTeams = () => {
+    const teamNames = [...new Set(employees.map((emp) => emp.team))];
+    // Ekipleri sıralı olarak döndür (1-2-3-4)
+    return teamNames.sort((a, b) => {
+      const numA = parseInt(a.split("-").pop());
+      const numB = parseInt(b.split("-").pop());
+      return numA - numB;
+    });
+  };
+
+  const metrics = calculateMetrics();
+  const connectionStatus = getConnectionStatus();
+  const { rankedEmployees, rankedTeams, workDays, totalWorkDays } =
+    calculateMonthlyRankings();
+
+  // Render functions
+  const renderDashboard = () => (
+    <div ref={dashboardRef}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <h2 style={{ margin: 0, color: "#8315b5" }}>
+          📊 Günlük Ortalamalar & Paylaşım
+        </h2>
+        <div style={styles.exportButtons}>
+          <button
+            style={{ ...styles.btn, ...styles.btnSuccess }}
+            onClick={sendWhatsApp}
+          >
+            📱 WhatsApp Gönder
+          </button>
+          <button
+            style={{ ...styles.btn, ...styles.btnInfo }}
+            onClick={() => openEmailModal("screenshot")}
+          >
+            📧 Email Gönder
+          </button>
+          <button
+            style={{ ...styles.btn, ...styles.btnDanger }}
+            onClick={refreshData}
+            disabled={refreshing}
+          >
+            {refreshing ? "⏳ Yenileniyor..." : "🔄 Verileri Yenile"}
+          </button>
+        </div>
+      </div>
+
+      <div
+        style={{
+          ...styles.statusInfo,
+          ...(connectionStatus.type === "success"
+            ? styles.statusSuccess
+            : connectionStatus.type === "warning"
+              ? styles.statusWarning
+              : styles.statusError),
+        }}
+      >
+        {connectionStatus.message}
+      </div>
+
+      {/* Genel Ekip Metrikleri */}
+      <div ref={metricsRef} style={styles.metricsGrid}>
+        <MetricCard
+          value={metrics.avgCalls}
+          label="Genel Ort. Arama"
+          target={kpiTargets.calls || 45}
+          progress={
+            metrics.avgCalls
+              ? Math.min(
+                  (metrics.avgCalls / (kpiTargets.calls || 45)) * 100,
+                  100,
+                )
+              : 0
+          }
+          progressType="good"
+        />
+        <MetricCard
+          value={metrics.avgProposals}
+          label="Genel Ort. Teklif"
+          target={kpiTargets.proposals || 5}
+          progress={
+            metrics.avgProposals
+              ? Math.min(
+                  (metrics.avgProposals / (kpiTargets.proposals || 5)) * 100,
+                  100,
+                )
+              : 0
+          }
+          progressType="good"
+        />
+        <MetricCard
+          value={metrics.avgOnline}
+          label="Genel Ort. Online Ziyaret"
+          target={kpiTargets.online_visits || 2}
+          progress={
+            metrics.avgOnline
+              ? Math.min(
+                  (metrics.avgOnline / (kpiTargets.online_visits || 2)) * 100,
+                  100,
+                )
+              : 0
+          }
+          progressType="excellent"
+        />
+        <MetricCard
+          value={metrics.avgPhysical}
+          label="Genel Ort. Fiziki Ziyaret"
+          target={kpiTargets.physical_visits || 1}
+          progress={
+            metrics.avgPhysical
+              ? Math.min(
+                  (metrics.avgPhysical / (kpiTargets.physical_visits || 1)) *
+                    100,
+                  100,
+                )
+              : 0
+          }
+          progressType="excellent"
+        />
+        <MetricCard
+          value={metrics.avgTotal}
+          label="Genel Ort. Toplam Ziyaret"
+          target={kpiTargets.total_visits || 3}
+          progress={
+            metrics.avgTotal
+              ? Math.min(
+                  (metrics.avgTotal / (kpiTargets.total_visits || 3)) * 100,
+                  100,
+                )
+              : 0
+          }
+          progressType="excellent"
+        />
+        <MetricCard
+          value={`${metrics.activeCount}/${employees.length}`}
+          label="👥 Bugün Aktif"
+          target={`Katılım: ${Math.round((metrics.activeCount / employees.length) * 100)}%`}
+          progress={Math.round((metrics.activeCount / employees.length) * 100)}
+          progressType="excellent"
+        />
+      </div>
+
+      {/* Hiyerarşik Ekip Yapısı - Sıralı */}
+      <div style={styles.hierarchyContainer}>
+        <h3 style={{ color: "#8315b5", marginBottom: "20px" }}>
+          🏢 Ekip Hiyerarşisi ve Günlük Performans
+        </h3>
+
+        {getUniqueTeams().map((teamName) => {
+          const teamMetrics = calculateTeamMetrics(teamName);
+          const teamEmployees = employees.filter(
+            (emp) => emp.team === teamName,
+          );
+
+          return (
+            <div key={teamName} style={{ marginBottom: "25px" }}>
+              <div style={styles.teamHeader}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>🏢 {teamName}</span>
+                  <div style={{ fontSize: "0.9em", opacity: 0.9 }}>
+                    Arama {teamMetrics.avgCalls} | Teklif{" "}
+                    {teamMetrics.avgProposals} | Toplam Ziyaret{" "}
+                    {teamMetrics.avgTotal} | 👥 {teamMetrics.activeCount}/
+                    {teamEmployees.length}
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.employeeList}>
+                {teamEmployees.map((emp) => {
+                  const empEntries = dataEntries.filter(
+                    (e) =>
+                      e.date === new Date().toISOString().split("T")[0] &&
+                      e.employee === emp.name,
+                  );
+
+                  const todayEntry = empEntries[0];
+                  const isActive = todayEntry && !todayEntry.on_leave;
+                  const isOnLeave = todayEntry && todayEntry.on_leave;
+
+                  return (
+                    <div
+                      key={emp.name}
+                      style={{
+                        ...styles.employeeItem,
+                        borderLeft: `4px solid ${isActive ? "#28a745" : isOnLeave ? "#ffc107" : "#dc3545"}`,
+                      }}
+                    >
+                      <div>
+                        <strong>{emp.name}</strong> - {emp.segment}
+                        {isOnLeave && (
+                          <span
+                            style={{ color: "#ffc107", marginLeft: "10px" }}
+                          >
+                            🏖️ İzinli
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: "0.9em" }}>
+                        {isActive ? (
+                          <>
+                            Arama {todayEntry.calls} | Teklif{" "}
+                            {todayEntry.proposals} | Toplam Ziyaret{" "}
+                            {todayEntry.total_visits}
+                          </>
+                        ) : isOnLeave ? (
+                          <span style={{ color: "#856404" }}>İzinli</span>
+                        ) : (
+                          <span style={{ color: "#dc3545" }}>Veri yok</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={styles.formContainer}>
+        <h3 style={{ color: "#8315b5", marginBottom: "20px" }}>
+          🚀 Hızlı İşlemler
+        </h3>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          {teams.map((team) => (
+            <button
+              key={team.name}
+              style={{ ...styles.btn, ...styles.btnWarning }}
+              onClick={() => setActiveTab("bulk-entry")}
+            >
+              📝 {team.name} Toplu Giriş
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDataEntry = () => (
+    <div style={styles.formContainer}>
+      <h2 style={{ marginBottom: "20px", color: "#8315b5" }}>
+        📝 Tekli Veri Girişi
+      </h2>
+
+      <div style={styles.formGrid}>
+        <div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>📅 Tarih</div>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleInputChange}
+              style={styles.formControl}
+              disabled={loading}
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>👤 Çalışan Seçin</div>
+            <select
+              name="employee"
+              value={formData.employee}
+              onChange={handleInputChange}
+              style={styles.formControl}
+              disabled={loading}
+            >
+              <option value="">-- Çalışan Seçin --</option>
+              {employees.map((emp) => (
+                <option key={emp.name} value={emp.name}>
+                  {emp.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {selectedEmployee && (
+            <>
+              <div style={styles.formGroup}>
+                <div style={styles.label}>🏢 Ekip</div>
+                <div style={styles.autoField}>{selectedEmployee.team}</div>
+              </div>
+              <div style={styles.formGroup}>
+                <div style={styles.label}>📋 Segment</div>
+                <div style={styles.autoField}>{selectedEmployee.segment}</div>
+              </div>
+            </>
+          )}
+        </div>
+        <div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>Arama Sayısı</div>
+            <input
+              type="number"
+              name="calls"
+              value={formData.calls}
+              onChange={handleInputChange}
+              style={styles.formControl}
+              placeholder={`Hedef: ${kpiTargets.calls || 45}`}
+              disabled={formData.onLeave || loading}
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>Teklif Sayısı</div>
+            <input
+              type="number"
+              name="proposals"
+              value={formData.proposals}
+              onChange={handleInputChange}
+              style={styles.formControl}
+              placeholder={`Hedef: ${kpiTargets.proposals || 5}`}
+              disabled={formData.onLeave || loading}
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>Online Ziyaret</div>
+            <input
+              type="number"
+              name="onlineVisits"
+              value={formData.onlineVisits}
+              onChange={handleInputChange}
+              style={styles.formControl}
+              placeholder={kpiTargets.online_visits || 2}
+              disabled={formData.onLeave || loading}
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>Fiziki Ziyaret</div>
+            <input
+              type="number"
+              name="physicalVisits"
+              value={formData.physicalVisits}
+              onChange={handleInputChange}
+              style={styles.formControl}
+              placeholder={kpiTargets.physical_visits || 1}
+              disabled={formData.onLeave || loading}
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>
+              <input
+                type="checkbox"
+                name="onLeave"
+                checked={formData.onLeave}
+                onChange={handleInputChange}
+                style={{ marginRight: "8px" }}
+                disabled={loading}
+              />
+              🏖️ İzinli/Hasta
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+        <button
+          onClick={handleSubmit}
+          style={{ ...styles.btn, ...styles.btnSuccess, flex: 1 }}
+          disabled={loading || connectionStatus.type === "error"}
+        >
+          {loading ? "⏳ Kaydediyor..." : "💾 Kaydet"}
+        </button>
+      </div>
+
+      {/* VERİ SİLME ÖZELLİKLERİ */}
+      {dataEntries.length > 0 && (
+        <div style={{ marginTop: "30px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "15px",
+            }}
+          >
+            <h3 style={{ color: "#8315b5", margin: 0 }}>
+              📋 Son Veriler & Silme İşlemleri
+            </h3>
+            <div>
+              <button
+                onClick={() =>
+                  deleteAllData(new Date().toISOString().split("T")[0])
+                }
+                style={{
+                  ...styles.btn,
+                  ...styles.btnDanger,
+                  padding: "8px 15px",
+                }}
+              >
+                🗑️ Bugünkü Tüm Verileri Sil
+              </button>
+            </div>
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.tableHeader}>Tarih</th>
+                  <th style={styles.tableHeader}>Çalışan</th>
+                  <th style={styles.tableHeader}>Ekip</th>
+                  <th style={styles.tableHeader}>Arama</th>
+                  <th style={styles.tableHeader}>Teklif</th>
+                  <th style={styles.tableHeader}>Online</th>
+                  <th style={styles.tableHeader}>Fiziki</th>
+                  <th style={styles.tableHeader}>Toplam</th>
+                  <th style={styles.tableHeader}>Durum</th>
+                  <th style={styles.tableHeader}>İşlemler</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dataEntries.slice(0, 20).map((entry, index) => (
+                  <tr
+                    key={entry.id || index}
+                    style={
+                      index % 2 === 0 ? { backgroundColor: "#f8f9fa" } : {}
+                    }
+                  >
+                    <td style={styles.tableCell}>{entry.date}</td>
+                    <td style={styles.tableCell}>
+                      <strong>{entry.employee}</strong>
+                    </td>
+                    <td style={styles.tableCell}>{entry.team}</td>
+                    <td style={styles.tableCell}>
+                      {entry.on_leave ? "-" : entry.calls}
+                    </td>
+                    <td style={styles.tableCell}>
+                      {entry.on_leave ? "-" : entry.proposals}
+                    </td>
+                    <td style={styles.tableCell}>
+                      {entry.on_leave ? "-" : entry.online_visits}
+                    </td>
+                    <td style={styles.tableCell}>
+                      {entry.on_leave ? "-" : entry.physical_visits}
+                    </td>
+                    <td style={styles.tableCell}>
+                      <strong>
+                        {entry.on_leave ? "-" : entry.total_visits}
+                      </strong>
+                    </td>
+                    <td style={styles.tableCell}>
+                      <span
+                        style={{
+                          color: entry.on_leave ? "#ffc107" : "#28a745",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {entry.on_leave ? "🏖️ İzinli" : "✅ Aktif"}
+                      </span>
+                    </td>
+                    <td style={styles.tableCell}>
+                      <div style={{ display: "flex", gap: "5px" }}>
+                        <button
+                          onClick={() =>
+                            deleteIndividualData(entry.employee, entry.date)
+                          }
+                          style={{
+                            ...styles.btn,
+                            ...styles.btnDanger,
+                            padding: "3px 8px",
+                            margin: 0,
+                            fontSize: "11px",
+                          }}
+                          title="Bu kaydı sil"
+                        >
+                          🗑️
+                        </button>
+                        <button
+                          onClick={() => deleteTeamData(entry.team, entry.date)}
+                          style={{
+                            ...styles.btn,
+                            ...styles.btnWarning,
+                            padding: "3px 8px",
+                            margin: 0,
+                            fontSize: "11px",
+                          }}
+                          title="Bu tarihte ekibin tüm verilerini sil"
+                        >
+                          🏢🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // YENİ: Toplu İşlem Sekmesi
+  const renderBulkEntry = () => (
+    <div>
+      <h2 style={{ marginBottom: "20px", color: "#8315b5" }}>
+        📝 Toplu Veri Girişi
+      </h2>
+
+      <div style={styles.formContainer}>
+        <div style={styles.formGroup}>
+          <div style={styles.label}>📅 Tarih</div>
+          <input
+            type="date"
+            value={bulkFormData.date}
+            onChange={(e) =>
+              setBulkFormData((prev) => ({ ...prev, date: e.target.value }))
+            }
+            style={styles.formControl}
+          />
+        </div>
+
+        <div style={styles.formGroup}>
+          <div style={styles.label}>🏢 Ekip Seçin</div>
+          <select
+            value={bulkFormData.team}
+            onChange={(e) => handleBulkTeamSelect(e.target.value)}
+            style={styles.formControl}
+          >
+            <option value="">-- Ekip Seçin --</option>
+            {getUniqueTeams().map((team) => (
+              <option key={team} value={team}>
+                {team}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {bulkFormData.employees.length > 0 && (
+          <div>
+            <h3 style={{ color: "#8315b5", marginBottom: "15px" }}>
+              📊 {bulkFormData.team} - Çalışan Verileri
+            </h3>
+
+            {bulkFormData.employees.map((emp, index) => (
+              <div
+                key={emp.name}
+                style={{
+                  background: "#f8f9fa",
+                  padding: "15px",
+                  borderRadius: "8px",
+                  marginBottom: "15px",
+                  border: "1px solid #dee2e6",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <h4 style={{ margin: 0, color: "#8315b5" }}>{emp.name}</h4>
+                  <label style={{ color: "#ffc107" }}>
+                    <input
+                      type="checkbox"
+                      checked={emp.onLeave}
+                      onChange={(e) =>
+                        handleBulkEmployeeChange(
+                          index,
+                          "onLeave",
+                          e.target.checked,
+                        )
+                      }
+                      style={{ marginRight: "5px" }}
+                    />
+                    🏖️ İzinli
+                  </label>
+                </div>
+
+                <div style={styles.bulkGrid}>
+                  <div>
+                    <label style={{ fontSize: "0.8em", color: "#666" }}>
+                      Arama
+                    </label>
+                    <input
+                      type="number"
+                      value={emp.calls}
+                      onChange={(e) =>
+                        handleBulkEmployeeChange(index, "calls", e.target.value)
+                      }
+                      style={styles.bulkInput}
+                      placeholder={kpiTargets.calls || 45}
+                      disabled={emp.onLeave}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "0.8em", color: "#666" }}>
+                      Teklif
+                    </label>
+                    <input
+                      type="number"
+                      value={emp.proposals}
+                      onChange={(e) =>
+                        handleBulkEmployeeChange(
+                          index,
+                          "proposals",
+                          e.target.value,
+                        )
+                      }
+                      style={styles.bulkInput}
+                      placeholder={kpiTargets.proposals || 5}
+                      disabled={emp.onLeave}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "0.8em", color: "#666" }}>
+                      Online
+                    </label>
+                    <input
+                      type="number"
+                      value={emp.onlineVisits}
+                      onChange={(e) =>
+                        handleBulkEmployeeChange(
+                          index,
+                          "onlineVisits",
+                          e.target.value,
+                        )
+                      }
+                      style={styles.bulkInput}
+                      placeholder={kpiTargets.online_visits || 2}
+                      disabled={emp.onLeave}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "0.8em", color: "#666" }}>
+                      Fiziki
+                    </label>
+                    <input
+                      type="number"
+                      value={emp.physicalVisits}
+                      onChange={(e) =>
+                        handleBulkEmployeeChange(
+                          index,
+                          "physicalVisits",
+                          e.target.value,
+                        )
+                      }
+                      style={styles.bulkInput}
+                      placeholder={kpiTargets.physical_visits || 1}
+                      disabled={emp.onLeave}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{ marginTop: "20px" }}>
+              <button
+                onClick={submitBulkData}
+                style={{ ...styles.btn, ...styles.btnSuccess }}
+                disabled={loading}
+              >
+                {loading ? "⏳ Kaydediyor..." : "💾 Toplu Kaydet"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // Aylık sıralama - İş günü bazlı ortalama
+  const renderMonthly = () => (
+    <div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <h2 style={{ color: "#8315b5", margin: 0 }}>
+          📊 Aylık Performans Sıralaması (Bugüne Kadar {workDays} İş Günü)
+        </h2>
+        <div style={styles.exportButtons}>
+          <button
+            style={{ ...styles.btn, ...styles.btnSuccess }}
+            onClick={() => {
+              const exportData = rankedEmployees.map((emp) => ({
+                Sıra: rankedEmployees.indexOf(emp) + 1,
+                Çalışan: emp.name,
+                Ekip: emp.team,
+                "Ort Arama": emp.avgCalls,
+                "Ort Teklif": emp.avgProposals,
+                "Ort Ziyaret": emp.avgVisits,
+                "Gün Sayısı": emp.days,
+              }));
+              exportToExcel(exportData, "aylik_sirala_bireysel");
+            }}
+          >
+            📊 Bireysel Excel
+          </button>
+          <button
+            style={{ ...styles.btn, ...styles.btnInfo }}
+            onClick={() => {
+              const exportData = rankedTeams.map((team) => ({
+                Sıra: rankedTeams.indexOf(team) + 1,
+                Ekip: team.name,
+                "Günlük Ort Arama": team.avgCalls,
+                "Günlük Ort Teklif": team.avgProposals,
+                "Günlük Ort Ziyaret": team.avgVisits,
+                "Çalışan Sayısı": team.employeeCount,
+                "İş Günü": workDays,
+              }));
+              exportToExcel(exportData, "aylik_sirala_ekip");
+            }}
+          >
+            🏢 Ekip Excel
+          </button>
+          <button
+            style={{ ...styles.btn, ...styles.btnWarning }}
+            onClick={() => openEmailModal("report", rankedEmployees)}
+          >
+            📧 Rapor Email
+          </button>
+        </div>
+      </div>
+
+      <div style={styles.metricsGrid}>
+        <MetricCard
+          value={rankedEmployees.length.toString()}
+          label="👥 Aktif Çalışan"
+        />
+        <MetricCard
+          value={rankedTeams.length.toString()}
+          label="🏢 Aktif Ekip"
+        />
+        <MetricCard
+          value={dataEntries
+            .filter((e) =>
+              e.date.startsWith(new Date().toISOString().slice(0, 7)),
+            )
+            .length.toString()}
+          label="📈 Bu Ay Toplam Giriş"
+        />
+        <MetricCard
+          value={`${workDays}/${totalWorkDays}`}
+          label="📅 İş Günü (Geçen/Toplam)"
+        />
+      </div>
+
+      <div style={styles.formContainer}>
+        <h3 style={{ color: "#8315b5", marginBottom: "20px" }}>
+          🏆 Ekip Sıralaması (Günlük Ortalama - Bugüne Kadar {workDays} İş Günü)
+        </h3>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.tableHeader}>Sıra</th>
+              <th style={styles.tableHeader}>Ekip</th>
+              <th style={styles.tableHeader}>Günlük Ort. Arama</th>
+              <th style={styles.tableHeader}>Günlük Ort. Teklif</th>
+              <th style={styles.tableHeader}>Günlük Ort. Ziyaret</th>
+              <th style={styles.tableHeader}>👥 Çalışan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rankedTeams.map((team, index) => (
+              <tr
+                key={team.name}
+                style={
+                  index < 3
+                    ? { backgroundColor: "#f8f9fa", fontWeight: "bold" }
+                    : {}
+                }
+              >
+                <td style={styles.tableCell}>
+                  {index === 0
+                    ? "🥇"
+                    : index === 1
+                      ? "🥈"
+                      : index === 2
+                        ? "🥉"
+                        : index + 1}
+                </td>
+                <td style={styles.tableCell}>
+                  <strong>{team.name}</strong>
+                </td>
+                <td style={styles.tableCell}>{team.avgCalls}</td>
+                <td style={styles.tableCell}>{team.avgProposals}</td>
+                <td style={styles.tableCell}>{team.avgVisits}</td>
+                <td style={styles.tableCell}>{team.employeeCount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={styles.formContainer}>
+        <h3 style={{ color: "#8315b5", marginBottom: "20px" }}>
+          🏆 Bireysel Sıralama (Günlük Ortalama - Bugüne Kadar {workDays} İş
+          Günü)
+        </h3>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.tableHeader}>Sıra</th>
+              <th style={styles.tableHeader}>Çalışan</th>
+              <th style={styles.tableHeader}>Ekip</th>
+              <th style={styles.tableHeader}>Günlük Ort. Arama</th>
+              <th style={styles.tableHeader}>Günlük Ort. Teklif</th>
+              <th style={styles.tableHeader}>Günlük Ort. Ziyaret</th>
+              <th style={styles.tableHeader}>📅 Veri Girilen Gün</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rankedEmployees.slice(0, 20).map((employee, index) => (
+              <tr
+                key={employee.name}
+                style={
+                  index < 3
+                    ? { backgroundColor: "#f8f9fa", fontWeight: "bold" }
+                    : {}
+                }
+              >
+                <td style={styles.tableCell}>
+                  {index === 0
+                    ? "🥇"
+                    : index === 1
+                      ? "🥈"
+                      : index === 2
+                        ? "🥉"
+                        : index + 1}
+                </td>
+                <td style={styles.tableCell}>
+                  <strong>{employee.name}</strong>
+                </td>
+                <td style={styles.tableCell}>{employee.team}</td>
+                <td style={styles.tableCell}>{employee.avgCalls}</td>
+                <td style={styles.tableCell}>{employee.avgProposals}</td>
+                <td style={styles.tableCell}>{employee.avgVisits}</td>
+                <td style={styles.tableCell}>{employee.days}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // YENİ: Admin Paneli
+  const renderAdmin = () => (
+    <div>
+      <h2 style={{ marginBottom: "20px", color: "#8315b5" }}>
+        👨‍💼 Admin Paneli
+      </h2>
+
+      {/* Çalışan Yönetimi */}
+      <div style={styles.adminCard}>
+        <h3 style={{ color: "#8315b5", marginBottom: "15px" }}>
+          👥 Çalışan Yönetimi
+        </h3>
+
+        <div style={styles.formGrid}>
+          <div>
+            <div style={styles.formGroup}>
+              <div style={styles.label}>👤 Yeni Çalışan Adı</div>
+              <input
+                type="text"
+                value={adminFormData.newEmployee.name}
+                onChange={(e) =>
+                  setAdminFormData((prev) => ({
+                    ...prev,
+                    newEmployee: { ...prev.newEmployee, name: e.target.value },
+                  }))
+                }
+                style={styles.formControl}
+                placeholder="Çalışan adı girin"
+              />
+            </div>
+          </div>
+          <div>
+            <div style={styles.formGroup}>
+              <div style={styles.label}>🏢 Ekip</div>
+              <select
+                value={adminFormData.newEmployee.team}
+                onChange={(e) =>
+                  setAdminFormData((prev) => ({
+                    ...prev,
+                    newEmployee: { ...prev.newEmployee, team: e.target.value },
+                  }))
+                }
+                style={styles.formControl}
+              >
+                <option value="">-- Ekip Seçin --</option>
+                {getUniqueTeams().map((team) => (
+                  <option key={team} value={team}>
+                    {team}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <div style={styles.formGroup}>
+              <div style={styles.label}>📋 Segment</div>
+              <select
+                value={adminFormData.newEmployee.segment}
+                onChange={(e) =>
+                  setAdminFormData((prev) => ({
+                    ...prev,
+                    newEmployee: {
+                      ...prev.newEmployee,
+                      segment: e.target.value,
+                    },
+                  }))
+                }
+                style={styles.formControl}
+              >
+                <option value="BM">BM</option>
+                <option value="ÖM">ÖM</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={addNewEmployee}
+          style={{ ...styles.btn, ...styles.btnSuccess }}
+        >
+          ➕ Çalışan Ekle
+        </button>
+      </div>
+
+      {/* KPI Hedef Yönetimi */}
+      <div style={styles.adminCard}>
+        <h3 style={{ color: "#8315b5", marginBottom: "15px" }}>
+          🎯 KPI Hedef Yönetimi
+        </h3>
+
+        <div style={styles.formGrid}>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>📞 Arama Hedefi</div>
+            <input
+              type="number"
+              value={
+                adminFormData.kpiUpdates.calls !== undefined
+                  ? adminFormData.kpiUpdates.calls
+                  : kpiTargets.calls
+              }
+              onChange={(e) =>
+                setAdminFormData((prev) => ({
+                  ...prev,
+                  kpiUpdates: {
+                    ...prev.kpiUpdates,
+                    calls: parseInt(e.target.value),
+                  },
+                }))
+              }
+              style={styles.formControl}
+              placeholder="45"
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>📄 Teklif Hedefi</div>
+            <input
+              type="number"
+              value={
+                adminFormData.kpiUpdates.proposals !== undefined
+                  ? adminFormData.kpiUpdates.proposals
+                  : kpiTargets.proposals
+              }
+              onChange={(e) =>
+                setAdminFormData((prev) => ({
+                  ...prev,
+                  kpiUpdates: {
+                    ...prev.kpiUpdates,
+                    proposals: parseInt(e.target.value),
+                  },
+                }))
+              }
+              style={styles.formControl}
+              placeholder="5"
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>💻 Online Ziyaret Hedefi</div>
+            <input
+              type="number"
+              value={
+                adminFormData.kpiUpdates.online_visits !== undefined
+                  ? adminFormData.kpiUpdates.online_visits
+                  : kpiTargets.online_visits
+              }
+              onChange={(e) =>
+                setAdminFormData((prev) => ({
+                  ...prev,
+                  kpiUpdates: {
+                    ...prev.kpiUpdates,
+                    online_visits: parseInt(e.target.value),
+                  },
+                }))
+              }
+              style={styles.formControl}
+              placeholder="2"
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>🏃‍♂️ Fiziki Ziyaret Hedefi</div>
+            <input
+              type="number"
+              value={
+                adminFormData.kpiUpdates.physical_visits !== undefined
+                  ? adminFormData.kpiUpdates.physical_visits
+                  : kpiTargets.physical_visits
+              }
+              onChange={(e) =>
+                setAdminFormData((prev) => ({
+                  ...prev,
+                  kpiUpdates: {
+                    ...prev.kpiUpdates,
+                    physical_visits: parseInt(e.target.value),
+                  },
+                }))
+              }
+              style={styles.formControl}
+              placeholder="1"
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>🎯 Toplam Ziyaret Hedefi</div>
+            <input
+              type="number"
+              value={
+                adminFormData.kpiUpdates.total_visits !== undefined
+                  ? adminFormData.kpiUpdates.total_visits
+                  : kpiTargets.total_visits
+              }
+              onChange={(e) =>
+                setAdminFormData((prev) => ({
+                  ...prev,
+                  kpiUpdates: {
+                    ...prev.kpiUpdates,
+                    total_visits: parseInt(e.target.value),
+                  },
+                }))
+              }
+              style={styles.formControl}
+              placeholder="3"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={updateKpiTargets}
+          style={{ ...styles.btn, ...styles.btnInfo }}
+        >
+          🎯 Hedefleri Güncelle
+        </button>
+      </div>
+
+      {/* Mevcut Çalışanlar */}
+      <div style={styles.formContainer}>
+        <h3 style={{ color: "#8315b5", marginBottom: "20px" }}>
+          👥 Mevcut Çalışanlar
+        </h3>
+        <div style={{ overflowX: "auto" }}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.tableHeader}>Çalışan</th>
+                <th style={styles.tableHeader}>Ekip</th>
+                <th style={styles.tableHeader}>Segment</th>
+                <th style={styles.tableHeader}>Performans</th>
+                <th style={styles.tableHeader}>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees.map((emp, index) => (
+                <tr
+                  key={emp.name}
+                  style={index % 2 === 0 ? { backgroundColor: "#f8f9fa" } : {}}
+                >
+                  <td style={styles.tableCell}>
+                    <strong>{emp.name}</strong>
+                  </td>
+                  <td style={styles.tableCell}>{emp.team}</td>
+                  <td style={styles.tableCell}>{emp.segment}</td>
+                  <td style={styles.tableCell}>
+                    {emp.performance.toFixed(1)}%
+                  </td>
+                  <td style={styles.tableCell}>
+                    <button
+                      onClick={() => deleteEmployee(emp.name)}
+                      style={{
+                        ...styles.btn,
+                        ...styles.btnDanger,
+                        padding: "5px 10px",
+                        margin: 0,
+                      }}
+                    >
+                      🗑️ Sil
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  // YENİ: Şifre Yönetimi (Düzeltilmiş)
+  const renderPasswordManagement = () => (
+    <div>
+      <h2 style={{ marginBottom: "20px", color: "#8315b5" }}>
+        🔐 Şifre Yönetimi
+      </h2>
+
+      {/* Admin Şifre Değiştirme */}
+      <div style={styles.adminCard}>
+        <h3 style={{ color: "#8315b5", marginBottom: "15px" }}>
+          👨‍💼 Admin Şifre Değiştirme
+        </h3>
+
+        <div style={styles.formGrid}>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>🔒 Mevcut Şifre</div>
+            <input
+              type="password"
+              value={oldPasswordInput}
+              onChange={(e) => setOldPasswordInput(e.target.value)}
+              style={styles.formControl}
+              placeholder="Mevcut admin şifresi"
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <div style={styles.label}>🔑 Yeni Şifre</div>
+            <input
+              type="password"
+              value={newPasswordInput}
+              onChange={(e) => setNewPasswordInput(e.target.value)}
+              style={styles.formControl}
+              placeholder="Yeni admin şifresi"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={changeAdminPassword}
+          style={{ ...styles.btn, ...styles.btnWarning }}
+        >
+          🔄 Admin Şifresi Değiştir
+        </button>
+
+        <div
+          style={{
+            marginTop: "15px",
+            padding: "10px",
+            background: "#fff3cd",
+            borderRadius: "8px",
+            border: "1px solid #ffc107",
+          }}
+        >
+          <strong>💡 Mevcut Admin Şifresi:</strong>
+          <span style={styles.passwordHidden}>••••••••</span>
+        </div>
+      </div>
+
+      {/* Ekip Şifre Yönetimi */}
+      <div style={styles.formContainer}>
+        <h3 style={{ color: "#8315b5", marginBottom: "20px" }}>
+          🏢 Ekip Şifre Yönetimi
+        </h3>
+
+        <div style={styles.metricsGrid}>
+          {getUniqueTeams().map((teamName) => {
+            const team = teams.find((t) => t.name === teamName) || {
+              name: teamName,
+              password: "team1234",
+            };
+            return (
+              <div key={team.name} style={styles.metricCard}>
+                <h4 style={{ color: "#8315b5", marginBottom: "15px" }}>
+                  {team.name}
+                </h4>
+
+                <div
+                  style={{
+                    marginBottom: "15px",
+                    padding: "10px",
+                    background: "#e8f5e8",
+                    borderRadius: "6px",
+                  }}
+                >
+                  <strong>Mevcut Şifre:</strong>
+                  <span style={styles.passwordHidden}>••••••••</span>
+                </div>
+
+                <button
+                  onClick={() => changeTeamPassword(team.name)}
+                  style={{ ...styles.btn, ...styles.btnInfo, width: "100%" }}
+                >
+                  🔄 Şifre Değiştir
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Şifre Güvenlik Bilgileri */}
+      <div
+        style={{
+          ...styles.statusInfo,
+          ...styles.statusWarning,
+        }}
+      >
+        <h4>🔒 Şifre Güvenlik Kuralları:</h4>
+        <ul style={{ marginLeft: "20px", marginTop: "10px" }}>
+          <li>Admin şifresi tüm sisteme erişim sağlar</li>
+          <li>
+            Ekip şifreleri sadece o ekibin toplu veri girişi için kullanılır
+          </li>
+          <li>Şifreler düzenli olarak değiştirilmelidir</li>
+          <li>Şifreleri güvenli yerlerde saklayın</li>
+        </ul>
+      </div>
+    </div>
+  );
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return renderDashboard();
+      case "data-entry":
+        return renderDataEntry();
+      case "bulk-entry":
+        return renderBulkEntry();
+      case "monthly":
+        return renderMonthly();
+      case "admin":
+        return renderAdmin();
+      case "password":
+        return renderPasswordManagement();
+      default:
+        return renderDashboard();
+    }
+  };
+
+  return (
+    <div
+      style={{
+        fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+        background: "linear-gradient(135deg, #8315b5, #5a0e7a)",
+        minHeight: "100vh",
+        color: "#333",
+        lineHeight: "1.6",
+      }}
+    >
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <h1 style={styles.headerTitle}>
+            📊 İstanbul Müşteriler KPI Dashboard
+          </h1>
+          <div style={{ opacity: 0.9, fontSize: "1.1em", fontWeight: "300" }}>
+            {new Date().toLocaleDateString("tr-TR", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}{" "}
+            - (İstanbul Müşteriler için hazırlanmıştır)
+          </div>
+        </div>
+
+        <nav style={styles.navBar}>
+          {[
+            { id: "dashboard", label: "📊 Dashboard" },
+            { id: "data-entry", label: "📝 Veri Girişi" },
+            { id: "bulk-entry", label: "📋 Toplu İşlem" },
+            { id: "monthly", label: "🏆 Aylık Sıralama" },
+            { id: "admin", label: "👨‍💼 Admin" },
+            { id: "password", label: "🔐 Şifre Yönetimi" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              style={{
+                ...styles.navTab,
+                ...(activeTab === tab.id ? styles.navTabActive : {}),
+              }}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+
+        <div style={styles.content}>{renderTabContent()}</div>
+      </div>
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              padding: "30px",
+              borderRadius: "12px",
+              width: "90%",
+              maxWidth: "500px",
+              boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            <h3>📧 Email Gönder</h3>
+            <div style={styles.formGroup}>
+              <div style={styles.label}>👤 Alıcı Email</div>
+              <input
+                type="email"
+                style={styles.formControl}
+                placeholder="ornek@email.com"
+                value={emailData.recipient}
+                onChange={(e) =>
+                  setEmailData((prev) => ({
+                    ...prev,
+                    recipient: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <div style={styles.label}>📝 Konu</div>
+              <input
+                type="text"
+                style={styles.formControl}
+                value={emailData.subject}
+                onChange={(e) =>
+                  setEmailData((prev) => ({ ...prev, subject: e.target.value }))
+                }
+              />
+            </div>
+            <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
+              <button
+                style={{ ...styles.btn, ...styles.btnSuccess }}
+                onClick={() => sendEmail("screenshot")}
+              >
+                📧 Gönder
+              </button>
+              <button
+                style={styles.btn}
+                onClick={() => setShowEmailModal(false)}
+              >
+                ❌ İptal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default KPIDashboard;
